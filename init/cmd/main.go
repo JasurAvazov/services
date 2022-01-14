@@ -84,7 +84,7 @@ func post(id string) error {
 		mq.LogToMQ("error", notFound)
 	case resp.ErrorCode == success:
 		fmt.Println(resp.Data)
-		fmt.Println("all right")
+		fmt.Println("success")
 		mq.LogToMQ("info", success)
 	default:
 		mq.SendToQueue(id)

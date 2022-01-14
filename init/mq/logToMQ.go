@@ -1,11 +1,14 @@
 package mq
 
 import (
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
+	"strconv"
 )
 
 func LogToMQ(logLevel string, statusCode int) {
+	fmt.Println(logLevel,"<--- loglevel\n",statusCode,"<---- status code")
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	Error(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -25,7 +28,8 @@ func LogToMQ(logLevel string, statusCode int) {
 	)
 	Error(err, "Failed to declare an exchange")
 
-	body := string(statusCode)
+	body := strconv.Itoa(statusCode)
+	fmt.Println("body ---->",body)
 	err = ch.Publish(
 		"logs_direct",          // exchange
 		logLevel,                       // routing key
