@@ -1,0 +1,66 @@
+definitions:
+  views.R:
+    properties:
+      data: {}
+      error_code:
+        type: integer
+      error_note:
+        type: string
+      status:
+        type: string
+    type: object
+  views.RecordStruct:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+info:
+  contact:
+    email: https://translate.google.com/?sl=en&tl=ru&text=scammer&op=translate
+    name: API Support
+    url: https://translate.google.com/?sl=en&tl=ru&text=scammer&op=translate
+  description: CRUD
+  license:
+    name: Scam
+    url: https://translate.google.com/?sl=en&tl=ru&text=scammer&op=translate
+  title: Jasur's Swagger
+paths:
+  /record/{id}:
+    get:
+      consumes:
+      - application/json
+      description: API to get a record by id
+      parameters:
+      - description: record id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/views.R'
+            - properties:
+                data:
+                  $ref: '#/definitions/views.RecordStruct'
+              type: object
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/views.R'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/views.R'
+      summary: Read record
+      tags:
+      - Record
+swagger: "2.0"

@@ -1,0 +1,105 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "CRUD",
+        "title": "Jasur's Swagger",
+        "contact": {
+            "name": "API Support",
+            "url": "https://translate.google.com/?sl=en\u0026tl=ru\u0026text=scammer\u0026op=translate",
+            "email": "https://translate.google.com/?sl=en\u0026tl=ru\u0026text=scammer\u0026op=translate"
+        },
+        "license": {
+            "name": "Scam",
+            "url": "https://translate.google.com/?sl=en\u0026tl=ru\u0026text=scammer\u0026op=translate"
+        }
+    },
+    "paths": {
+        "/record/{id}": {
+            "get": {
+                "description": "API to get a record by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Record"
+                ],
+                "summary": "Read record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "record id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/views.R"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/views.RecordStruct"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/views.R"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/views.R"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "views.R": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "error_code": {
+                    "type": "integer"
+                },
+                "error_note": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "views.RecordStruct": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
