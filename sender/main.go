@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -32,13 +31,13 @@ func main() {
 		nil,     // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
-	var input string
-	_, err = fmt.Scan(&input)
-	if err != nil {
-		panic("input err")
-	}
+	//var input string
+	//_, err = fmt.Scan(&input)
+	//if err != nil {
+	//	panic("input err")
+	//}
 	body := map[string]interface{}{
-		"id":input,
+		"id":"1",
 	}
 	b, _ := json.Marshal(body)
 	err = ch.Publish(

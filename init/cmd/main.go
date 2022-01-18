@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"third/mq"
 )
 
@@ -48,13 +49,23 @@ func takeMsgs(){
 	Error(err, "Failed to register a consumer")
 
 	forever := make(chan bool)
-	go func() {
-		d := data{}
-		for i := range msgs{
-			_ = json.Unmarshal(i.Body, &d)
-			post(d.Id)
-		}
-	}()
+
+		go func() {
+			d := data{}
+			for i := range msgs{
+				_ = json.Unmarshal(i.Body, &d)
+				post(d.Id,i)
+				//fmt.Println("code --->",code)
+				//if code=="500"{
+				//	fmt.Println("Nack")
+				//	i.Nack(false,true)
+				//	continue
+				//}
+				//fmt.Println("Ack")
+				//i.Ack(false)
+			}
+		}()
+
 	<-forever
 }
 
@@ -63,7 +74,7 @@ type response struct {
 	Data      interface{} `json:"data"`
 }
 
-func post(id string) {
+func post(id string,i amqp.Delivery) string {
 	res,err :=http.Get(fmt.Sprintf("%s/record/%s",url,id))
 	if err != nil{
 		panic(err)
@@ -75,9 +86,9 @@ func post(id string) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Print("\n\n")
 	resp := response{}
 	_ = json.Unmarshal(all, &resp)
+	fmt.Println(resp.ErrorCode)
 	switch {
 	case resp.ErrorCode == notFound:
 		fmt.Println("not found")
@@ -87,9 +98,11 @@ func post(id string) {
 		fmt.Println("success")
 		mq.LogToMQ("info", success)
 	default:
-		mq.SendToQueue(id)
+		i.Nack(false,true)
 		fmt.Println("internal error")
 	}
+	fmt.Println("post return")
+	return strconv.Itoa(resp.ErrorCode)
 }
 
 func main() {
@@ -108,11 +121,6 @@ func main() {
 
 // 1) функция post обеспечивает связь с первым сервисом
 // 2,3) функция linkBetweenLogger обеспечивает отправку данных
-
-type Res struct {
-	Code string `json:"code,omitempty"`
-	Body string `json:"body,omitempty"`
-}
 
 var (
 	notFound = 404

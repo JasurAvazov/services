@@ -27,7 +27,7 @@ func (h *handler) ReadRecord(c *gin.Context) {
 	if id == "" {
 		panic("id unparsed")
 	}
-	h.log.Info("keldi "+id)
+	h.log.Info("came "+id)
 
 	rand.Seed(time.Now().UnixNano())
 	internalServer := rand.Intn(2)
