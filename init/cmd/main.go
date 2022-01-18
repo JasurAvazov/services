@@ -40,7 +40,7 @@ func takeMsgs(){
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
-		true,   // auto-ack
+		false,   // auto-ack
 		false,  // exclusive
 		false,  // no-local
 		false,  // no-wait
@@ -88,20 +88,21 @@ func post(id string,i amqp.Delivery) string {
 	}
 	resp := response{}
 	_ = json.Unmarshal(all, &resp)
-	fmt.Println(resp.ErrorCode)
+	fmt.Print("\n\n")
 	switch {
 	case resp.ErrorCode == notFound:
 		fmt.Println("not found")
 		mq.LogToMQ("error", notFound)
+		i.Ack(false)
 	case resp.ErrorCode == success:
 		fmt.Println(resp.Data)
 		fmt.Println("success")
 		mq.LogToMQ("info", success)
+		i.Ack(false)
 	default:
 		i.Nack(false,true)
 		fmt.Println("internal error")
 	}
-	fmt.Println("post return")
 	return strconv.Itoa(resp.ErrorCode)
 }
 
