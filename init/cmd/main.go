@@ -63,7 +63,7 @@ type response struct {
 	Data      interface{} `json:"data"`
 }
 
-func post(id string) error {
+func post(id string) {
 	res,err :=http.Get(fmt.Sprintf("%s/record/%s",url,id))
 	if err != nil{
 		panic(err)
@@ -75,7 +75,7 @@ func post(id string) error {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("\n\n")
+	fmt.Print("\n\n")
 	resp := response{}
 	_ = json.Unmarshal(all, &resp)
 	switch {
@@ -90,7 +90,6 @@ func post(id string) error {
 		mq.SendToQueue(id)
 		fmt.Println("internal error")
 	}
-	return nil
 }
 
 func main() {
