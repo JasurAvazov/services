@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,15 +17,7 @@ type data struct {
 	Id string `json:"id"`
 }
 
-func takeMsgs(){
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	Error(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	Error(err, "Failed to open a channel")
-	defer ch.Close()
-
+func takeMsgs(ch *amqp.Channel){
 	q, err := ch.QueueDeclare(
 		"queue", // name
 		false,   // durable
@@ -48,25 +39,13 @@ func takeMsgs(){
 	)
 	Error(err, "Failed to register a consumer")
 
-	forever := make(chan bool)
 
-		go func() {
-			d := data{}
-			for i := range msgs{
-				_ = json.Unmarshal(i.Body, &d)
-				post(d.Id,i)
-				//fmt.Println("code --->",code)
-				//if code=="500"{
-				//	fmt.Println("Nack")
-				//	i.Nack(false,true)
-				//	continue
-				//}
-				//fmt.Println("Ack")
-				//i.Ack(false)
-			}
-		}()
+	d := data{}
+	for i := range msgs {
+		_ = json.Unmarshal(i.Body, &d)
+		post(d.Id, i)
+	}
 
-	<-forever
 }
 
 type response struct {
@@ -79,9 +58,9 @@ func post(id string,i amqp.Delivery) string {
 	if err != nil{
 		panic(err)
 	}
-	defer func(Body io.ReadCloser) {
-		_ = Body.Close()
-	}(res.Body)
+	defer func() {
+		_ = res.Body.Close()
+	}()
 	all, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		panic(err)
@@ -93,7 +72,7 @@ func post(id string,i amqp.Delivery) string {
 	case resp.ErrorCode == notFound:
 		fmt.Println("not found")
 		mq.LogToMQ("error", notFound)
-		i.Ack(false)
+		i.Nack(false,false)
 	case resp.ErrorCode == success:
 		fmt.Println(resp.Data)
 		fmt.Println("success")
@@ -107,7 +86,14 @@ func post(id string,i amqp.Delivery) string {
 }
 
 func main() {
-	takeMsgs()
+	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	Error(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	Error(err, "Failed to open a channel")
+	defer ch.Close()
+	takeMsgs(ch)
 }
 
 var (
