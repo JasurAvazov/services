@@ -6,7 +6,13 @@ import (
 	"strconv"
 )
 
-func LogToMQ(logLevel string, statusCode int) {
+func Error(err error, msg string) {
+	if err != nil {
+		log.Panicf("%s: %s", msg, err)
+	}
+}
+
+func (c *Conn) LogToMQ(logLevel string, statusCode int) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	Error(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -17,9 +23,9 @@ func LogToMQ(logLevel string, statusCode int) {
 
 	err = ch.ExchangeDeclare(
 		"logs_direct", // name
-		"direct",      // type
-		true,          // durable
-		false,         // auto-deleted
+		"direct",       // type
+		true,        // durable
+		false,     // auto-deleted
 		false,         // internal
 		false,         // no-wait
 		nil,           // arguments
@@ -37,10 +43,4 @@ func LogToMQ(logLevel string, statusCode int) {
 			Body:        []byte(body),
 		})
 	Error(err, "Failed to publish a message")
-}
-
-func Error(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
 }
